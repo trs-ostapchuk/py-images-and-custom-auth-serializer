@@ -56,7 +56,7 @@ class AuthTokenSerializer(serializers.Serializer):
         password = attrs.get("password")
 
         if email and password:
-            email = authenticate(
+            authenticated_user = authenticate(
                 request=self.context.get("request"),
                 email=email, password=password
             )
@@ -64,12 +64,12 @@ class AuthTokenSerializer(serializers.Serializer):
             # The authenticate call simply returns None for is_active=False
             # users. (Assuming the default ModelBackend authentication
             # backend.)
-            if not email:
+            if not authenticated_user:
                 msg = _("Unable to log in with provided credentials.")
                 raise serializers.ValidationError(msg, code="authorization")
         else:
             msg = _("Must include 'email' and 'password'.")
             raise serializers.ValidationError(msg, code="authorization")
 
-        attrs["user"] = email
+        attrs["user"] = authenticated_user
         return attrs
